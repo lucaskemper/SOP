@@ -1,0 +1,8 @@
+variable,source,non_null
+"price, d12, e12, ret, retx, rfree, Goyal predictors",Amit Goyal-Welch workbook,1848
+Shiller price/dividend/earnings extension,Robert Shiller data,0
+SP500,FRED API,104
+CPIAUCSL,FRED API,936
+TB3MS,FRED API,1092
+VIXCLS,FRED API,420
+USREC,FRED API,1848
