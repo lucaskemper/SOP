@@ -188,7 +188,7 @@ ms  = gs + dp                                           # Combined SOP forecast
 
 | Variable Group | Source | Coverage |
 |----------------|--------|----------|
-| Price, dividends, earnings | Goyal-Welch workbook | 1871–2024 (1,848 months) |
+| Price, dividends, earnings | agoyal_data.xlsx | 1871–2024 (1,848 months) |
 | FRED macro (SP500, CPI, TB3MS, VIX, USREC) | FRED API | Varies by series |
 | Shiller extension | Yale / Robert Shiller | Fallback if Goyal ends early |
 
