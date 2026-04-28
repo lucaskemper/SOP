@@ -1,544 +1,256 @@
-# SOP: Same Old Prediction
+# SOP Report: Return Forecasting, Portfolio Translation, and Regime Diagnostics
+
+This repository is a complete empirical workflow for SOP-style equity return forecasting, benchmark comparison, regime analysis, and forecast-to-portfolio translation. The work is implemented as one executable notebook and a set of generated CSV and figure artifacts.
+
+The center of the project is [SOP.ipynb](SOP.ipynb), which loads raw inputs, engineers features, runs forecasting experiments, computes portfolio outcomes, and exports all report tables and charts.
+
+## 1. What Is In This Repo
+
+### Core implementation
+- [SOP.ipynb](SOP.ipynb): Full pipeline from data load to final exports.
+- [agoyal_data.xlsx](agoyal_data.xlsx): Main source workbook used by the notebook.
+- [README.md](README.md): This report.
+
+### Main generated data products
+- [sop_monthly_enriched.csv](sop_monthly_enriched.csv): Master monthly panel used downstream.
+- [sop_data_source_audit.csv](sop_data_source_audit.csv): Variable-level source traceability.
+- [sop_descriptive_stats.csv](sop_descriptive_stats.csv): Distributional summary of key inputs and constructed variables.
+
+### Forecast evaluation outputs
+- [sop_benchmark_results.csv](sop_benchmark_results.csv)
+- [sop_benchmark_full_sample.csv](sop_benchmark_full_sample.csv)
+- [sop_benchmark_available_sample.csv](sop_benchmark_available_sample.csv)
+- [sop_vix_common_results.csv](sop_vix_common_results.csv)
+- [sop_vix_common_forecasts.csv](sop_vix_common_forecasts.csv)
+- [sop_vix_dm_tests.csv](sop_vix_dm_tests.csv)
+- [sop_reversion_results.csv](sop_reversion_results.csv)
+- [sop_crisis_forecast.csv](sop_crisis_forecast.csv)
+- [sop_crisis_definition_overlap.csv](sop_crisis_definition_overlap.csv)
+
+### Portfolio evaluation outputs
+- [sop_strategy_matched_results.csv](sop_strategy_matched_results.csv)
+- [sop_abcd_returns_matched.csv](sop_abcd_returns_matched.csv)
+- [sop_crisis_portfolio_outcomes.csv](sop_crisis_portfolio_outcomes.csv)
+- [sop_mean_excess_tests_matched.csv](sop_mean_excess_tests_matched.csv)
+
+### Robustness and near-term forecast outputs
+- [sop_robustness.csv](sop_robustness.csv)
+- [sop_last12_forecasts.csv](sop_last12_forecasts.csv)
+
+### Figures
+- [fig_cum_mse_gain.png](fig_cum_mse_gain.png)
+- [fig_oos_r2_comparison.png](fig_oos_r2_comparison.png)
+- [fig_sop_components.png](fig_sop_components.png)
+- [fig_strategy_cum_wealth_matched.png](fig_strategy_cum_wealth_matched.png)
+- [fig_strategy_weights_matched.png](fig_strategy_weights_matched.png)
+- [vix_crisis_chart.png](vix_crisis_chart.png)
+
+## 2. How The Files Work Together
+
+The pipeline is linear and auditable:
+
+1. Raw ingest and source audit
+- Input: [agoyal_data.xlsx](agoyal_data.xlsx)
+- Optional augmentation: FRED series (cached or downloaded by notebook settings)
+- Output: [sop_data_source_audit.csv](sop_data_source_audit.csv)
+
+2. Feature construction and benchmark setup
+- SOP decomposition components are built in the monthly panel.
+- The historical-mean benchmark is constructed once and reused in all forecast cells.
+- Output: [sop_monthly_enriched.csv](sop_monthly_enriched.csv)
+
+3. Forecast model comparisons
+- Baseline SOP vs cleaned benchmark predictors.
+- VIX-enhanced and alternative enhanced variants on a strict common sample.
+- Output: [sop_benchmark_results.csv](sop_benchmark_results.csv), [sop_vix_common_results.csv](sop_vix_common_results.csv), [sop_vix_dm_tests.csv](sop_vix_dm_tests.csv)
+
+4. Regime-specific forecast diagnostics
+- Fixed crisis windows and dynamic VIX greater than 25 splits.
+- Output: [sop_crisis_forecast.csv](sop_crisis_forecast.csv), [sop_crisis_definition_overlap.csv](sop_crisis_definition_overlap.csv)
+
+5. Forecast-to-portfolio translation
+- Forecasts are transformed into strategy weights and returns.
+- Matched-sample A/B/C/D portfolio tests plus benchmark portfolios are computed.
+- Output: [sop_strategy_matched_results.csv](sop_strategy_matched_results.csv), [sop_abcd_returns_matched.csv](sop_abcd_returns_matched.csv)
+
+6. Statistical and economic strategy diagnostics
+- Mean excess-return difference tests.
+- Crisis-window portfolio outcomes.
+- Output: [sop_mean_excess_tests_matched.csv](sop_mean_excess_tests_matched.csv), [sop_crisis_portfolio_outcomes.csv](sop_crisis_portfolio_outcomes.csv)
+
+7. Stress and sensitivity checks
+- Training-window, lagged-input, winsorized, lagged-VIX variants.
+- Output: [sop_robustness.csv](sop_robustness.csv)
+
+8. Presentation exports
+- Last-12 forecast table and figures.
+- Output: [sop_last12_forecasts.csv](sop_last12_forecasts.csv) plus all png files.
+
+## 3. Notebook Architecture And Execution Stages
+
+[SOP.ipynb](SOP.ipynb) currently contains 31 cells with a fully executed run state. The functional stages are:
+
+- Stage A: Settings and imports.
+- Stage B: Utility functions and forecasting helpers.
+- Stage C: Data loading, source merge logic, and source audit export.
+- Stage D: SOP component construction, target alignment, historical-mean benchmark construction.
+- Stage E: Descriptive stats export.
+- Stage F: Benchmark forecast comparisons and separated full-sample vs available-sample outputs.
+- Stage G: VIX-enhanced common-sample experiment and loss-difference tests.
+- Stage H: Reversion extension table (reported as exploratory).
+- Stage I: Crisis forecast splits and overlap table.
+- Stage J: Portfolio helper functions and matched-sample strategy outputs.
+- Stage K: Crisis portfolio outcomes with small-N annualized-metric suppression.
+- Stage L: Mean excess-return difference tests.
+- Stage M: Robustness suite.
+- Stage N: Figures and last-12 export.
 
-**Stock Market Return Forecasting via Decomposition-Based Predictors**
+## 4. Methodological Design Choices In This Version
 
-SOP is an academic finance research project that replicates and extends stock market return forecasting models using a decomposition approach. The core insight: combining long-run valuation signals (dividend-price ratio), short-run fundamental momentum (earnings growth), and cross-sectional valuation changes (market-to-book momentum) produces more accurate out-of-sample forecasts than any single predictor alone.
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Quick Start](#quick-start)
-- [Project Structure](#project-structure)
-- [Methodology](#methodology)
-- [SOP Components](#sop-components)
-- [Data](#data)
-- [Results](#results)
-- [Portfolio Strategies](#portfolio-strategies)
-- [Crisis Analysis](#crisis-analysis)
-- [Robustness Checks](#robustness-checks)
-- [Output Files](#output-files)
-- [Configuration](#configuration)
-- [Dependencies](#dependencies)
-
----
-
-## Overview
-
-### What is SOP?
-
-The **SOP forecast** is a decomposition of stock market returns into three economically meaningful components:
-
-| Component | Signal | Description |
-|-----------|--------|-------------|
-| **dp** | Long-run valuation | Dividend-price ratio — captures mean-reversion in prices |
-| **ge** | Short-run fundamentals | 12-month earnings growth momentum |
-| **gm** | Cross-sectional momentum | Change in price-to-earnings ratio (PE) |
-
-SOP = dp + ge + gm
+The repository currently reflects these intentional choices:
 
-This decomposition-based forecast is compared against:
-- Historical mean benchmark (expanding window of realized log returns)
-- 14 Goyal-Welch predictors (dfy, tbl, tms, ntis, infl, ltr, dfr, svar, dp_gw, dy, ep, de, bm)
-- VIX-enhanced variants using implied volatility as an additional predictor
-
-### Key Design Principles
-
-- **No look-ahead bias**: Variance estimates use only realized returns through date t
-- **Single fixed benchmark**: Historical mean computed once on the full panel, reused everywhere
-- **Matched-sample comparisons**: A/B/C/D strategies evaluated on identical date ranges
-- **Audit-ready**: All outputs reproducible with explicit source tracking
+- Annual non-overlap SOP evaluation was removed.
+- Forecast tables and portfolio tables are separated by design.
+- A single historical-mean benchmark is used consistently across forecast evaluation cells.
+- VIX-based regime classification requires VIX availability, so overlap counts are computed on VIX-observed rows.
+- For crisis windows with N less than 12, annualized volatility, Sharpe, and CEQ are left blank intentionally.
+- Strategy-level inference is framed as mean excess-return difference tests, not as a renamed Sharpe test.
+- Portfolio weights allow moderate leverage with explicit bounds.
 
----
+## 5. Data Coverage And Panel Facts
 
-## Quick Start
+From [sop_monthly_enriched.csv](sop_monthly_enriched.csv):
 
-### Prerequisites
+- Rows: 1,848
+- Columns: 57
+- Date range: 1871-01-31 to 2024-12-31
 
-- Python 3.10+
-- Jupyter Notebook or JupyterLab
+Operationally relevant evaluation windows:
 
-### Running the Analysis
+- Long forecast OOS window for primary benchmark table: 1948-01 to 2024-12, N=924.
+- Common VIX-enhanced matched forecasting window: 2010-02 to 2024-12, N=179.
+- VIX availability overlap table base: 420 rows in total.
 
-```bash
-# Clone the repository
-git clone https://github.com/lucaskemper/SOP.git
-cd SOP
+## 6. Results In Depth
 
-# Launch Jupyter
-jupyter notebook SOP.ipynb
+### 6.1 Baseline SOP vs benchmark predictors
+Source: [sop_benchmark_results.csv](sop_benchmark_results.csv)
 
-# Execute cells sequentially from top to bottom
-```
+Key point estimate in the long sample:
+- SOP baseline OOS R2 vs historical mean: 0.005767
+- MAE gain: 0.000025
+- MSE-F: 5.359241
 
-All outputs (CSV tables and PNG figures) are generated in the working directory.
+Interpretation:
+- The SOP gain is positive but economically modest.
+- Among top rows, ep is second but materially lower than SOP on OOS R2.
+- Most traditional predictors remain near zero or negative OOS R2 over this long horizon.
 
----
+### 6.2 VIX-enhanced common-sample forecasting
+Source: [sop_vix_common_results.csv](sop_vix_common_results.csv), [sop_vix_dm_tests.csv](sop_vix_dm_tests.csv)
 
-## Project Structure
+In the common sample (N=179):
+- Enhanced SOP: VIXCLS OOS R2 vs historical mean: 0.013373
+- Baseline SOP OOS R2 vs historical mean: -0.009666
+- Incremental R2 vs baseline SOP: 0.022818
 
-```
-SOP/
-├── SOP.ipynb                        # Main analysis notebook (all code, all outputs)
-├── agoyal_data.xlsx                 # Source data from Goyal-Welch workbook
-├── sop_monthly_enriched.csv         # Enriched monthly panel (1,848 rows × 57 columns)
-│
-├── Output CSV Files (20 files)       # Generated by SOP.ipynb
-│   ├── sop_data_source_audit.csv
-│   ├── sop_descriptive_stats.csv
-│   ├── sop_baseline_forecast_performance.csv
-│   ├── sop_annual_forecast_performance.csv
-│   ├── sop_annual_nonoverlap.csv
-│   ├── sop_benchmark_results.csv
-│   ├── sop_vix_common_results.csv
-│   ├── sop_vix_common_forecasts.csv
-│   ├── sop_vix_dm_tests.csv
-│   ├── sop_reversion_results.csv
-│   ├── sop_crisis_forecast.csv
-│   ├── sop_crisis_definition_overlap.csv
-│   ├── sop_strategy_matched_results.csv
-│   ├── sop_abcd_returns_matched.csv
-│   ├── sop_crisis_portfolio_outcomes.csv
-│   ├── sop_sharpe_tests_matched.csv
-│   ├── sop_ceq_gain_matched.csv
-│   ├── sop_robustness.csv
-│   └── sop_last12_forecasts.csv
-│
-└── Output PNG Figures (6 files)
-    ├── fig_cum_mse_gain.png
-    ├── fig_oos_r2_comparison.png
-    ├── fig_sop_components.png
-    ├── fig_strategy_cum_wealth_matched.png
-    ├── fig_strategy_weights_matched.png
-    └── vix_crisis_chart.png
-```
-
----
-
-## Methodology
-
-### Forecasting: Connor-Korajczyk Shrinkage
-
-Univariate forecasts use **shrunk OLS regression** with intensity parameter λ = 1200:
+Loss-difference test context:
+- VIX-enhanced model has favorable mean loss differences vs dfy, ntis, tbl, and tms enhancements.
+- p-values remain above conventional thresholds, so this is directional evidence, not strong statistical confirmation.
 
-```
-β* = (n / (n + λ)) × β̂
-ŷ = α* + β* × x
-```
+### 6.3 Crisis forecast behavior
+Source: [sop_crisis_forecast.csv](sop_crisis_forecast.csv), [sop_crisis_definition_overlap.csv](sop_crisis_definition_overlap.csv)
 
-where:
-- n = training sample size
-- λ = shrinkage intensity (default: 1200)
-- β̂ = OLS slope estimate
-- β* = shrunk slope toward zero
-
-This regularization prevents over-fitting in small samples.
-
-### Forecast Evaluation Metrics
-
-| Metric | Formula | Interpretation |
-|--------|---------|----------------|
-| **OOS R²** | 1 − MSE_model / MSE_benchmark | Fraction of benchmark MSE explained by model |
-| **MAE Gain** | MAE_benchmark − MAE_model | Reduction in mean absolute error |
-| **MSE-F** | n × (MSE_benchmark − MSE_model) / MSE_model | F-statistic for MSE improvement |
-| **Diebold-Mariano** | Loss-difference test | Statistically significant forecast gains |
-
-### Portfolio Construction
-
-Two weighting schemes evaluated:
-
-1. **Markowitz (γ = 2.0)**: `w = (E[r] − rf) / (γ × σ²)`
-2. **Vol-managed (Goyal svar scaling)**: `w_scaled = w × (σ_avg / σ_t)`
-
-Weight bounds: [0.0, 1.5] for equity allocation.
-
----
-
-## SOP Components
-
-### Definition
-
-```python
-dp  = log(d12 / (12 × price))                          # Dividend-price ratio
-ge  = log(e12 / e12_lag1)                              # Earnings growth (12-month)
-gm  = log(PE_t / PE_t-1)                               # PE change (market-to-book momentum)
-gs  = rolling_mean(ge, window=240)                      # 5-year rolling mean of ge
-ms  = gs + dp                                           # Combined SOP forecast
-```
-
-### Descriptive Statistics (Full Panel, 1871–2024)
-
-| Variable | N | Mean | Std | Min | Median | Max |
-|----------|---:|------:|----:|-----:|-------:|----:|
-| r_log | 1,188 | 0.815% | 5.37% | −33.9% | 1.31% | 34.7% |
-| dp | 1,848 | 0.353% | 0.147% | 0.09% | 0.35% | 1.27% |
-| ge | 1,847 | 0.339% | 3.68% | −52.8% | 0.55% | 70.4% |
-| gm | 1,847 | 0.050% | 5.74% | −72.4% | 0.09% | 53.6% |
-| gs | 1,608 | 0.344% | 0.267% | −0.54% | 0.40% | 0.87% |
-| ms | 1,608 | 0.680% | 0.256% | −0.28% | 0.69% | 1.43% |
-| hist_mean | 949 | 0.744% | 0.090% | 0.41% | 0.77% | 0.88% |
-| VIXCLS | 420 | 19.54 | 7.50 | 9.51 | 17.67 | 59.89 |
+Fixed-window split:
+- Crisis: OOS R2 0.020523, N=63.
+- Non-crisis: OOS R2 0.002455, N=861.
 
----
+Dynamic VIX split (VIX-observed rows only):
+- Crisis (VIX greater than 25): OOS R2 -0.014450, N=79.
+- Non-crisis: OOS R2 0.007315, N=340.
 
-## Data
-
-### Sources
+Interpretation:
+- Fixed-window crisis labeling and VIX-threshold labeling capture different subsets and produce different conclusions.
+- The overlap table confirms this mismatch and is critical for preventing regime-definition confusion.
 
-| Variable Group | Source | Coverage |
-|----------------|--------|----------|
-| Price, dividends, earnings | agoyal_data.xlsx | 1871–2024 (1,848 months) |
-| FRED macro (SP500, CPI, TB3MS, VIX, USREC) | FRED API | Varies by series |
-| Shiller extension | Yale / Robert Shiller | Fallback if Goyal ends early |
+### 6.4 Matched-sample portfolio outcomes
+Source: [sop_strategy_matched_results.csv](sop_strategy_matched_results.csv), [sop_abcd_returns_matched.csv](sop_abcd_returns_matched.csv)
 
-### Enriched Panel: 57 Columns
+Matched sample: N=179 (2010-02 to 2024-12).
 
-```
-Identifiers:       date, forecast_target_date
-Raw Goyal data:    price, d12, e12, ret, retx, rfree, lty,
-                   dp_gw, dy, ep, de, bm, dfy, tbl, tms, ntis,
-                   infl, ltr, dfr, svar, cay
-FRED data:         SP500, CPIAUCSL, TB3MS, VIXCLS, USREC
-SOP components:    ret_decimal, r_log, dp, ge, gm, gs, ms
-Benchmarks:        hist_mean, hist_mean_xret
-Forecasts:         ms_enh_VIXCLS, ms_enh_dfy, ms_enh_ntis,
-                   ms_enh_tms, ms_enh_tbl
-Portfolio data:     rolling_var_5yr, rv_t, vm_scale
-Robustness:        *_lagfund, *_winsor, *_lag1 versions
-```
-
-### Data Quality
-
-- Historical mean: 949 non-null observations (first valid: 1945-12-31)
-- SOP components (ms): 1,608 non-null observations
-- VIXCLS: 420 non-null observations (from FRED, 1990 onward)
-- All predictors cleaned: non-real-time, duplicate, and outcome-like variables removed
+Headline comparisons:
+- Best Sharpe among SOP variants is B: SOP plus vol-managed at 0.956178.
+- D: VIX-SOP plus vol-managed is close at 0.950481.
+- Buy-and-hold Sharpe is 0.918445 with lower turnover and no leverage.
+- Historical mean plus Markowitz has highest annual return (0.178740) but lower Sharpe than B.
 
----
+Risk and implementation texture:
+- Vol-managed variants reduce volatility and drawdown vs pure Markowitz SOP variants.
+- Turnover is substantially higher for vol-managed strategies, so friction sensitivity matters.
+- Average weights above 1 reflect leverage usage under the configured bounds.
 
-## Results
+### 6.5 Inference on strategy differences
+Source: [sop_mean_excess_tests_matched.csv](sop_mean_excess_tests_matched.csv)
 
-### Baseline Forecast Performance (1948–2024, N = 924)
-
-The SOP forecast outperforms all 14 Goyal-Welch predictors on an out-of-sample basis.
-
-| Model | OOS R² vs HM | MAE Gain | MSE-F |
-|-------|-------------:|--------:|------:|
-| **SOP baseline** | **0.58%** | **+0.000025** | **5.36** |
-| ep | 0.27% | −0.000099 | 2.49 |
-| dy | 0.05% | −0.000179 | 0.42 |
-| dp_gw | 0.04% | −0.000112 | 0.39 |
-| infl | 0.03% | +0.000026 | 0.31 |
-| ntis | 0.02% | +0.000119 | 0.22 |
-| bm | −0.01% | −0.000213 | −0.13 |
-| dfy | −0.04% | −0.000013 | −0.33 |
-| ltr | −0.04% | −0.000049 | −0.37 |
-| tms | −0.06% | +0.000008 | −0.59 |
-| dfr | −0.07% | −0.000016 | −0.68 |
-| tbl | −0.08% | −0.000001 | −0.70 |
-| svar | −0.09% | −0.000004 | −0.80 |
-| de | −0.38% | +0.000008 | −3.48 |
+Across reported pairwise comparisons:
+- Mean excess-return difference p-values are weak (for example 0.786, 0.795, 0.766; best case around 0.105).
 
-**Key finding**: Only SOP and ep (earnings-price ratio) show positive OOS R² versus the historical mean benchmark over the full 1948–2024 period.
+Interpretation:
+- Performance ranking in point estimates should not be overinterpreted as statistically settled.
+- The repository is transparent about this and treats portfolio inference cautiously.
 
-### Annual Non-Overlapping Evaluation (1948–2024, N = 77 years)
+### 6.6 Crisis-window portfolio outcomes
+Source: [sop_crisis_portfolio_outcomes.csv](sop_crisis_portfolio_outcomes.csv)
 
-| Model | OOS R² vs HM | MAE Gain | MSE-F |
-|-------|-------------:|--------:|------:|
-| **Baseline SOP (annual)** | **2.64%** | **+0.000300** | **2.09** |
-
-### VIX-Enhanced SOP (2010–2024, N = 179)
+Small-N handling:
+- COVID (N=3) and Inflation shock (N=10) rows intentionally suppress annualized Sharpe/volatility/CEQ.
 
-| Model | OOS R² vs HM | R² vs Baseline SOP |
-|-------|-------------:|------------------:|
-| **VIX-enhanced SOP** | **1.34%** | **+2.28%** |
-| ntis-enhanced | 0.12% | +1.07% |
-| Baseline SOP | −0.97% | baseline |
+Best cumulative return by crisis definition:
+- COVID: Buy-and-hold equity performs least negatively by cumulative return.
+- Inflation shock: Buy-and-hold equity performs least negatively by cumulative return.
+- All fixed crisis months: Buy-and-hold equity performs least negatively by cumulative return.
+- VIX greater than 25 months: C: VIX-SOP plus Markowitz has strongest cumulative return.
 
-VIX enhancement uses a second-stage regression where VIX predicts the gm (market-to-book momentum) component. This two-stage approach improves forecast accuracy in the volatile post-2010 period.
+Interpretation:
+- Regime-dependent behavior is heterogeneous, and there is no single strategy dominance across all crisis definitions.
 
-### Diebold-Mariano Loss-Difference Tests
+### 6.7 Robustness profile
+Source: [sop_robustness.csv](sop_robustness.csv)
 
-VIX-enhanced SOP vs. alternative enhancers (all vs. VIXCLS):
+Core findings:
+- Baseline SOP is strongest around the 240-month training setup in this report context.
+- VIX-enhanced variants improve with longer windows in some specifications, but shorter windows can be negative.
+- Winsorizing ge and gm improves baseline SOP OOS R2 vs the main baseline point estimate.
+- Lagging VIX by one month weakens the VIX-enhanced result relative to contemporaneous VIX setup.
 
-| Comparison | Mean Loss Diff | t-stat | p-value |
-|------------|---------------:|-------:|--------:|
-| VIX vs. dfy | +0.000038 | 1.28 | 0.204 |
-| VIX vs. ntis | +0.000022 | 0.72 | 0.473 |
-| VIX vs. tbl | +0.000038 | 1.23 | 0.221 |
-| VIX vs. tms | +0.000033 | 1.10 | 0.275 |
+Interpretation:
+- Results are somewhat parameter-sensitive but directionally coherent with the main narrative.
+- The robustness table is essential for understanding where improvements are stable vs fragile.
 
-VIX produces lower average squared forecast errors than all alternatives, though differences are not statistically significant at conventional levels (n = 179).
+## 7. Practical Reading Guide By Objective
 
----
+If your objective is forecast comparison:
+- Start with [sop_benchmark_results.csv](sop_benchmark_results.csv).
+- Then read [sop_vix_common_results.csv](sop_vix_common_results.csv) and [sop_vix_dm_tests.csv](sop_vix_dm_tests.csv).
 
-## Portfolio Strategies
+If your objective is portfolio selection:
+- Start with [sop_strategy_matched_results.csv](sop_strategy_matched_results.csv).
+- Then inspect [sop_mean_excess_tests_matched.csv](sop_mean_excess_tests_matched.csv).
+- Use [sop_abcd_returns_matched.csv](sop_abcd_returns_matched.csv) for custom backtests.
 
-### Strategy Definitions
+If your objective is crisis behavior:
+- Pair [sop_crisis_forecast.csv](sop_crisis_forecast.csv) with [sop_crisis_definition_overlap.csv](sop_crisis_definition_overlap.csv).
+- Then inspect [sop_crisis_portfolio_outcomes.csv](sop_crisis_portfolio_outcomes.csv).
 
-| Strategy | Forecast | Weighting |
-|----------|----------|-----------|
-| **A** | SOP | Markowitz (γ = 2.0) |
-| **B** | SOP | Vol-managed (Goyal svar scaling) |
-| **C** | VIX-enhanced SOP | Markowitz (γ = 2.0) |
-| **D** | VIX-enhanced SOP | Vol-managed (Goyal svar scaling) |
+If your objective is reliability and reproducibility:
+- Review [sop_data_source_audit.csv](sop_data_source_audit.csv), [sop_robustness.csv](sop_robustness.csv), and [sop_monthly_enriched.csv](sop_monthly_enriched.csv).
 
-Benchmarks: Historical mean + Markowitz, Buy-and-hold equity
 
-### Full Sample Performance (2010–2024, N = 179 months)
+## 8. Caveats And Limits
 
-| Strategy | Ann. Return | Ann. Vol | Sharpe | Max DD | Turnover | CEQ (γ=3) |
-|----------|------------:|---------:|-------:|-------:|---------:|-----------:|
-| **B: SOP + vol-managed** | **16.9%** | **16.8%** | **0.956** | **−25.9%** | 0.178 | **0.118** |
-| D: VIX-SOP + vol-managed | 16.9% | 16.8% | 0.950 | −26.6% | 0.215 | 0.118 |
-| A: SOP + Markowitz | 16.8% | 19.9% | 0.826 | −33.6% | 0.020 | 0.105 |
-| C: VIX-SOP + Markowitz | 16.4% | 20.1% | 0.801 | −34.5% | 0.151 | 0.101 |
-| Historical mean + Markowitz | 17.9% | 20.2% | 0.865 | −31.7% | 0.010 | 0.113 |
-| Buy-and-hold equity | 14.3% | 14.6% | 0.918 | −23.7% | 0.000 | 0.102 |
+- Forecast R2 gains are small in absolute magnitude, even when positive.
+- Several inference p-values are weak, limiting strong claims about strategy superiority.
+- No transaction costs, taxes, slippage, or market impact are applied.
+- Leverage is allowed by construction, which can inflate both upside and downside outcomes depending on regime.
+- Regime-definition choice materially changes crisis conclusions.
 
-**Key findings**:
-- Vol-managed strategies (B, D) achieve **~50% higher Sharpe ratios** than Markowitz strategies (A, C)
-- Vol-management reduces maximum drawdown by ~8 percentage points
-- Turnover is higher for vol-managed strategies (~0.18–0.22 vs. 0.01–0.15)
-- SOP-based strategies (A, B) match or exceed the historical mean on a CEQ utility basis
-
-### Sharpe Difference Tests (2010–2024)
-
-| Comparison | Sharpe Diff | t-stat | p-value |
-|------------|------------:|-------:|--------:|
-| B vs. A (vol-managed vs. Markowitz) | +0.130 | −0.27 | 0.786 |
-| D vs. A (VIX vol-managed vs. Markowitz) | +0.125 | −0.30 | 0.766 |
-| A vs. HM (SOP vs. historical mean) | −0.039 | −1.63 | 0.105 |
-
-Differences are not statistically significant at conventional levels — the样本 is too small (n = 179 months) to distinguish strategies with this precision.
-
-### CEQ Utility Gains (γ = 3)
-
-| Strategy | CEQ Ann. | vs. A | vs. HM |
-|----------|----------:|------:|-------:|
-| B: SOP + vol-managed | 0.118 | **+0.013** | **+0.005** |
-| D: VIX-SOP + vol-managed | 0.118 | +0.012 | +0.004 |
-| A: SOP + Markowitz | 0.105 | baseline | −0.008 |
-| C: VIX-SOP + Markowitz | 0.101 | −0.004 | −0.013 |
-| Historical mean + Markowitz | 0.113 | +0.008 | baseline |
-| Buy-and-hold equity | 0.102 | −0.003 | −0.011 |
-
-CEQ (Certainty Equivalent) utility with risk aversion γ = 3 confirms that vol-managed SOP strategies deliver the highest risk-adjusted utility.
-
----
-
-## Crisis Analysis
-
-### Standardized Crisis Windows
-
-| Crisis | Start | End | Months |
-|--------|-------|-----|-------:|
-| Dot-com | 2000-03-31 | 2002-09-30 | 31 |
-| GFC | 2007-10-31 | 2009-03-31 | 18 |
-| COVID | 2020-02-29 | 2020-04-30 | 3 |
-| Inflation shock | 2022-01-31 | 2022-10-31 | 10 |
-
-### Forecast Performance by Regime (Full Sample)
-
-| Definition | Regime | N | OOS R² | MAE Gain |
-|-----------|--------|---:|-------:|--------:|
-| Fixed windows | Crisis | 62 | **3.05%** | +0.000754 |
-| Fixed windows | Non-crisis | 862 | 0.04% | −0.000027 |
-| VIX>25 (forecast date) | Crisis | 79 | −1.45% | −0.000797 |
-| VIX>25 (forecast date) | Non-crisis | 845 | 1.04% | +0.000102 |
-
-SOP performs best during **standardized crisis windows** (OOS R² = 3.05%), suggesting the dp component captures flight-to-quality dynamics.
-
-### Crisis Window Portfolio Outcomes
-
-#### COVID (2020-02 to 2020-04, N = 3 months)
-
-| Strategy | Cum. Return | Max DD | Ann. Sharpe |
-|----------|------------:|-------:|------------:|
-| Buy-and-hold | −9.0% | −12.2% | −0.663 |
-| **B: SOP + vol-managed** | **−16.9%** | **−9.5%** | **−2.166** |
-| A/C: SOP/VIX + Markowitz | −14.6% | −18.4% | −0.662 |
-| Historical mean + Markowitz | −14.6% | −18.4% | −0.662 |
-
-#### Inflation Shock (2022-01 to 2022-10, N = 10 months)
-
-| Strategy | Cum. Return | Max DD | Ann. Sharpe |
-|----------|------------:|-------:|------------:|
-| Buy-and-hold | −17.5% | −20.1% | −0.907 |
-| **D: VIX-SOP + vol-managed** | **−22.0%** | **−20.4%** | **−1.417** |
-| B: SOP + vol-managed | −22.1% | −19.6% | −1.518 |
-| A/C: SOP/VIX + Markowitz | −26.7% | −28.7% | −0.908 |
-
-#### VIX>25 Months (High Volatility Regime, N = 28 months)
-
-| Strategy | Cum. Return | Max DD | Ann. Sharpe |
-|----------|------------:|-------:|------------:|
-| **C: VIX-SOP + Markowitz** | **+92.3%** | **−18.4%** | **0.961** |
-| Historical mean + Markowitz | +84.4% | −18.4% | 0.937 |
-| D: VIX-SOP + vol-managed | +43.0% | −11.4% | 0.845 |
-| Buy-and-hold | +60.4% | −12.2% | 0.961 |
-
-**Key finding**: During high-VIX regimes, the VIX-enhanced SOP with Markowitz weighting (Strategy C) delivers the highest cumulative return (+92.3%), outperforming all other strategies.
-
----
-
-## Robustness Checks
-
-### Training Window Sensitivity
-
-| Training Window | SOP OOS R² | VIX-SOP OOS R² |
-|----------------:|-----------:|---------------:|
-| 60 months (5 yr) | −2.14% | −2.71% |
-| 120 months (10 yr) | +0.16% | −1.22% |
-| 180 months (15 yr) | +0.48% | +0.69% |
-| **240 months (20 yr)** | **+0.58%** | **+1.34%** |
-| 300 months (25 yr) | +0.24% | +2.30% |
-
-The 20-year (240-month) training window is the primary specification. VIX-enhanced SOP shows improved performance with longer training windows.
-
-### Alternative Specifications
-
-| Robustness Check | OOS R² | MAE Gain |
-|------------------|-------:|--------:|
-| Lag D12/E12 by 1 month | 0.51% | +0.000013 |
-| Winsorize ge/gm at 1–99% | **0.68%** | **+0.000046** |
-| VIX lagged 1 month | 0.52% | −0.000109 |
-
-Winsorizing extreme earnings growth and market-to-book values improves forecast performance, suggesting outliers in ge/gm introduce noise.
-
----
-
-## Output Files
-
-### Forecast Evaluation
-
-| File | Description |
-|------|-------------|
-| `sop_benchmark_results.csv` | SOP vs. 14 Goyal-Welch predictors — OOS R², MAE, MSE-F |
-| `sop_vix_common_results.csv` | VIX-enhanced SOP on common sample vs. alternatives |
-| `sop_vix_dm_tests.csv` | Diebold-Mariano loss-difference test results |
-| `sop_reversion_results.csv` | Two-stage reversion forecasts (PE residual forecasts) |
-| `sop_crisis_forecast.csv` | Forecast performance during crisis vs. non-crisis regimes |
-| `sop_robustness.csv` | Training window, lagged fundamentals, winsorization results |
-
-### Portfolio Evaluation
-
-| File | Description |
-|------|-------------|
-| `sop_strategy_matched_results.csv` | A/B/C/D strategy performance on matched sample |
-| `sop_abcd_returns_matched.csv` | Monthly returns for all strategies (for replication) |
-| `sop_crisis_portfolio_outcomes.csv` | Portfolio performance during each crisis window |
-| `sop_sharpe_tests_matched.csv` | Sharpe ratio difference tests between strategies |
-| `sop_ceq_gain_matched.csv` | CEQ utility gains vs. SOP-A and historical mean |
-
-### Data Exports
-
-| File | Description |
-|------|-------------|
-| `sop_monthly_enriched.csv` | Full 57-column monthly panel |
-| `sop_data_source_audit.csv` | Variable-level source tracking |
-| `sop_descriptive_stats.csv` | Summary statistics for key variables |
-| `sop_last12_forecasts.csv` | Most recent 12 monthly forecasts |
-
----
-
-## Configuration
-
-### Key Parameters
-
-```python
-FORECAST_START       = "1948-01-31"   # Out-of-sample evaluation start
-TARGET_END           = "2024-12-31"    # Data end date
-MIN_TRAIN_MONTHS     = 240             # Minimum training window (20 years)
-SHRINKAGE_INTENSITY  = 1200            # Connor-Korajczyk shrinkage λ
-
-ROLLING_VAR_WINDOW   = 60              # 5-year variance estimation window
-GAMMA_MARKOWITZ      = 2.0             # Risk aversion for Markowitz weighting
-WEIGHT_BOUNDS        = (0.0, 1.5)      # Equity weight bounds
-VM_SCALE_BOUNDS      = (0.25, 4.0)     # Vol-management scale bounds
-
-CRISIS_WINDOWS = {
-    "Dot-com":         ("2000-03-31", "2002-09-30"),
-    "GFC":             ("2007-10-31", "2009-03-31"),
-    "COVID":           ("2020-02-29", "2020-04-30"),
-    "Inflation shock": ("2022-01-31", "2022-10-31"),
-}
-```
-
----
-
-## Dependencies
-
-All dependencies are standard scientific Python packages. No `requirements.txt` is provided — the notebook is self-contained.
-
-```
-numpy          # Numerical operations
-pandas         # Data manipulation
-matplotlib     # Plotting
-scipy          # Statistical tests (HAC standard errors, t-distributions)
-requests       # FRED API calls
-IPython        # Jupyter display utilities
-```
-
-Install via:
-```bash
-pip install numpy pandas matplotlib scipy requests ipython
-```
-
-### FRED API Key
-
-The notebook uses a public fallback FRED API key. To use your own:
-```bash
-export FRED_API_KEY="your_key_here"
-```
-Set `USE_FRED_EXTENSION = True` to fetch fresh macro data.
-
----
-
-## Methodology Notes
-
-### Why SOP Works
-
-The SOP decomposition captures three distinct sources of return variation:
-
-1. **Dividend-price ratio (dp)**: Long-run mean-reversion signal. High dp → cheap equities → positive future returns.
-
-2. **Earnings growth (ge)**: Short-run fundamental momentum. Accelerating earnings predict continued outperformance.
-
-3. **Market-to-book momentum (gm)**: Cross-sectional valuation change. PE expansion predicts further appreciation beyond fundamentals.
-
-By combining all three, SOP hedges against the risk that any single signal dominates: dp works during recessions, ge works during recoveries, gm works during momentum regimes.
-
-### Why Not Use Standard Predictors?
-
-Most Goyal-Welch predictors (tbl, tms, ntis, etc.) failed to beat the historical mean in recent decades, likely due to:
-- Structural changes in interest rate regimes
-- Increased correlation with sentiment rather than fundamentals
-- Data mining bias in-sample that doesn't generalize
-
-The SOP decomposition sidesteps these issues by using **realized fundamentals** (dividends, earnings) rather than **survey or market-implied** variables.
-
-### Limitations
-
-- **Statistical insignificance**: Sharpe differences between strategies are not significant (p > 0.10)
-- **Short VIX sample**: Only 179 monthly observations since VIX data begins in 1990
-- **No transaction costs**: Portfolio turnover is reported but not cost-adjusted
-- **Single beta**: No conditioning on state variables beyond VIX
-
----
-
-## License
-
-This is an academic research project. Data sources (Goyal-Welch, FRED, Shiller) retain their respective original licenses.
-
-## References
-
-- Goyal, A., & Welch, I. (2008). A Comprehensive Look at the Empirical Performance of Equity Return Prediction. *Review of Financial Studies*.
-- Connor, G., & Korajczyk, R. A. (1986). Performance Measurement with the Arbitrage Pricing Theory. *Journal of Finance*.
-- Diebold, F. X., & Mariano, R. S. (1995). Comparing Predictive Accuracy. *Journal of Business & Economic Statistics*.
-- Markowitz, H. (1952). Portfolio Selection. *Journal of Finance*.
-
----
-
-*Generated by SOP.ipynb — all results are reproducible from the provided Excel source data.*
