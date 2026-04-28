@@ -1,7 +1,5 @@
 # SOP Research Results and Discussion
 
-**Scope.** This report analyzes the uploaded project files: the README, the executed `SOP.ipynb` notebook, and the seven uploaded CSV outputs. The README references additional artifacts that were not included in the upload bundle, so this report treats the notebook outputs as evidence where a referenced CSV was not available as a standalone file.
-
 ## 1. Executive summary
 
 The project is an empirical workflow for **sum-of-parts (SOP) equity-return forecasting**, forecast benchmarking, regime diagnostics, and forecast-to-portfolio translation. The core forecasting object is a one-month-ahead log return forecast built from a dividend-price term and a smoothed earnings-growth term. The notebook then tests whether additional predictors, especially VIX, improve the SOP model and whether the forecasts translate into portfolio value.
@@ -16,21 +14,6 @@ The crisis evidence is mixed. Fixed crisis windows favor the SOP forecast in for
 
 The biggest caveat is implementation realism. The portfolio tests allow weights up to 1.5x equity exposure and do not deduct transaction costs, taxes, financing spreads, slippage, or market impact. Vol-managed strategies improve Sharpe and drawdown, but they have much higher turnover. The report’s practical conclusion is therefore: **SOP is a useful structured forecasting signal, VIX augmentation is promising, but the investable edge needs transaction-cost, financing, and real-time data-release validation before being treated as production-ready.**
 
-## 2. Files analyzed
-
-| file                              | role                                   |
-|:----------------------------------|:---------------------------------------|
-| README.md                         | project README / prior report context  |
-| SOP.ipynb                         | executable notebook (31 cells)         |
-| sop_abcd_returns_matched.csv      | tabular output (179 rows x 14 columns) |
-| sop_benchmark_results.csv         | tabular output (15 rows x 12 columns)  |
-| sop_crisis_portfolio_outcomes.csv | tabular output (24 rows x 15 columns)  |
-| sop_last12_forecasts.csv          | tabular output (12 rows x 10 columns)  |
-| sop_robustness.csv                | tabular output (13 rows x 12 columns)  |
-| sop_strategy_matched_results.csv  | tabular output (6 rows x 12 columns)   |
-| sop_vix_common_results.csv        | tabular output (6 rows x 12 columns)   |
-
-The notebook contains **31 cells** and a fully executed run state. Several important tables are visible in the notebook output even though their CSV files were not part of the uploaded bundle, including the source audit, descriptive statistics, VIX loss-difference tests, reversion extension, crisis forecast table, and mean excess-return tests.
 
 ## 3. Methodology reconstructed from the notebook
 
@@ -442,7 +425,7 @@ The lagged-fundamentals and winsorized variants are useful because they address 
 
 7. **Potential model-selection risk.** Several variants are tested. The best-performing specification may partly reflect selection over choices such as training window, VIX timing, and winsorization.
 
-## 14. Recommended next research steps
+## 14. Recommended next research steps - Lucas: I don't think we should push much further than current results but here are some things that an AI recommended
 
 1. **Add transaction-cost and financing-cost layers.** Recompute portfolio results with plausible monthly turnover costs, leverage financing spreads, and margin constraints.
 
@@ -457,9 +440,5 @@ The lagged-fundamentals and winsorized variants are useful because they address 
 6. **Pre-register regime definitions.** Evaluate fixed crises, VIX>25, VIX quantiles, recessions, and drawdown regimes separately to avoid ambiguity.
 
 7. **Investigate winsorization further.** Since winsorized components improve long-sample SOP, test whether robust component estimation can be made part of the primary model rather than a robustness afterthought.
-
-## 15. Bottom-line conclusion
-
-The uploaded files support a credible but cautious research narrative. Baseline SOP is a modestly successful long-sample forecasting framework. VIX enhancement improves the modern common-sample forecast, especially under squared-error loss, but does not pass strong significance tests. In portfolios, volatility-managed SOP variants produce the best Sharpe ratios, while historical-mean Markowitz produces the highest annual return and buy-and-hold remains hard to beat on simplicity, cost, and drawdown.
 
 The strongest next step is not another forecast tweak; it is an implementation-validity layer. The strategy needs transaction costs, leverage financing, and real-time data timing before the economic results can be treated as investable rather than promising in-sample research evidence.
