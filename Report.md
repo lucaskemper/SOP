@@ -12,12 +12,9 @@ Portfolio results are more economically visible than forecast results. In the 17
 
 The crisis evidence is mixed. Fixed crisis windows favor the SOP forecast in forecasting metrics, but VIX>25 months show negative SOP forecast R². Portfolio performance also changes sharply by crisis definition: buy-and-hold is least bad in COVID, the inflation shock, and all fixed crisis months combined, while VIX-SOP Markowitz performs best in VIX>25 months. The regime labels are not interchangeable.
 
-The biggest caveat is implementation realism. The portfolio tests allow weights up to 1.5x equity exposure and do not deduct transaction costs, taxes, financing spreads, slippage, or market impact. Vol-managed strategies improve Sharpe and drawdown, but they have much higher turnover. The report’s practical conclusion is therefore: **SOP is a useful structured forecasting signal, VIX augmentation is promising, but the investable edge needs transaction-cost, financing, and real-time data-release validation before being treated as production-ready.**
+## 2. Methodology reconstructed from the notebook
 
-
-## 3. Methodology reconstructed from the notebook
-
-### 3.1 Data and timing
+### 2.1 Data and timing
 
 The data pipeline begins with the Goyal-Welch monthly and annual workbook, merges available FRED-style macro/market series from cache or API, and optionally supports a Shiller extension. In the executed notebook, the Goyal monthly panel spans **1871-01-31 to 2024-12-31** with **1,848 monthly rows**; the annual sheet spans **1871 to 2024** with **154 annual rows**. The forecast target is aligned so that row `t` forecasts the return at row `t+1`.
 
@@ -33,7 +30,7 @@ The operational settings recovered from the notebook are:
 | Weight bounds | 0.0 to 1.5 | no short equity; max 150% equity exposure |
 | Vol-management scale bounds | 0.25 to 4.0 | limits inverse-volatility scaling |
 
-### 3.2 SOP forecast construction
+### 2.2 SOP forecast construction
 
 The notebook decomposes realized log returns into three components:
 
@@ -57,7 +54,7 @@ ms_enh_VIX_t = gs_t + dp_t + forecast(gm_{t+1} | VIX_t)
 
 The same shrunk univariate method is used for benchmark predictors and alternative enhanced SOP variants. The shrinkage rule pulls the slope toward zero by multiplying the estimated slope by `n / (n + 1200)`, which is conservative; even with 240 observations, the slope is only about one-sixth of the unshrunk estimate.
 
-### 3.3 Forecast metrics
+### 2.3 Forecast metrics
 
 The primary forecasting metric is out-of-sample R² versus the historical mean:
 
@@ -67,7 +64,7 @@ OOS R² = 1 - MSE_model / MSE_historical_mean
 
 Positive values mean the model has lower squared forecast error than the expanding historical mean. The notebook also reports MSE, MAE, MAE gain, and an MSE-F-style statistic computed from the model and benchmark MSEs. Because monthly equity-return forecasting is noisy, values near zero should not be overinterpreted.
 
-### 3.4 Portfolio translation
+### 2.4 Portfolio translation
 
 Forecasts are converted into equity weights using a mean-variance/Markowitz rule:
 
@@ -83,7 +80,7 @@ portfolio_return_{t+1} = weight_t * equity_return_{t+1} + (1 - weight_t) * rf_{t
 
 The notebook explicitly uses realized equity variance only through date `t`, not `t+1`, which is an important no-lookahead design choice.
 
-## 4. Data coverage and descriptive facts
+## 3. Data coverage and descriptive facts
 
 The source audit in the notebook shows that the core Goyal-Welch variables cover the full 1,848 monthly rows. FRED-derived coverage differs by series: VIX has 420 non-null observations, TB3MS has 1,092, CPIAUCSL has 936, SP500 has 104, and USREC has full monthly coverage in the enriched panel. The Shiller extension had zero non-null rows in the executed run because the Goyal workbook already reached the target end date.
 
@@ -119,7 +116,7 @@ Key descriptive statistics from the notebook are:
 
 Several details matter for interpretation. First, realized monthly log returns are fat-tailed: `r_log` has kurtosis of about 7.66. Second, the SOP forecast itself is much smoother than realized returns: `ms` has a standard deviation of about 0.0026, versus 0.0537 for `r_log`. Third, `ge` and `gm` are highly non-normal, with extreme skew/kurtosis, which explains why the notebook includes winsorized robustness checks.
 
-## 5. Long-sample forecast results
+## 4. Long-sample forecast results
 
 The benchmark table covers the primary long OOS sample from **1948-01-31 to 2024-12-31** with **924 monthly forecast observations**. The combined uploaded benchmark CSV contains a duplicate SOP baseline row because the notebook concatenates full-sample and available-sample benchmark outputs; the analytical conclusion is unaffected.
 
@@ -146,7 +143,7 @@ The strongest conventional predictor is `ep`, with OOS R² of **0.269%**, but it
 
 The MAE evidence is weaker than the MSE evidence. SOP’s MAE gain is only **0.25 basis points** of monthly log return, while some models with near-zero or negative OOS R² have small positive MAE gains. That means SOP’s advantage is more visible in squared-error loss than in absolute-error loss, and the result may depend on how larger forecast misses are weighted.
 
-## 6. VIX-enhanced forecasting results
+## 5. VIX-enhanced forecasting results
 
 The VIX-enhanced experiment uses a strict common sample from **2010-02-28 to 2024-12-31**, requiring all compared forecasts to be available on the same dates. This is the right design because it avoids giving one model an easier sample.
 
@@ -163,7 +160,7 @@ The VIX-enhanced SOP model is clearly the top model in this common sample. It im
 
 However, the VIX model does not dominate every loss perspective. Its MAE gain versus historical mean is negative (**-0.76 bp**), while the NTIS-enhanced model has a positive MAE gain. This suggests VIX’s advantage is concentrated in reducing larger squared errors rather than improving the typical absolute forecast error.
 
-### 6.1 Loss-difference tests
+### 5.1 Loss-difference tests
 
 The notebook compares VIX-enhanced SOP against alternative enhanced models using HAC/Newey-West-style loss-difference tests.
 
@@ -176,7 +173,7 @@ The notebook compares VIX-enhanced SOP against alternative enhanced models using
 
 All mean loss differences are positive, meaning VIX has lower squared loss than the comparison model under the notebook’s sign convention. But the p-values are above conventional thresholds. The best p-value is about **0.204** versus the DFY-enhanced model. That supports a cautious interpretation: VIX is a promising conditioning variable, but the test does not establish a statistically decisive edge over the alternatives in the 179-month common sample.
 
-### 6.2 Reversion extension
+### 5.2 Reversion extension
 
 The notebook also evaluates an exploratory two-stage reversion extension based on valuation-level residuals. The notebook itself warns that the residual appears non-stationary in some tests and does not treat the reversion model as reliable evidence.
 
@@ -189,7 +186,7 @@ The notebook also evaluates an exploratory two-stage reversion extension based o
 
 The VIX reversion variant is positive, but weaker than the direct VIX-enhanced model. DFY and NTIS reversion variants are negative. The right takeaway is that simple VIX conditioning on multiple growth is more compelling than the more elaborate reversion setup, at least in this run.
 
-## 7. Crisis and regime forecast behavior
+## 6. Crisis and regime forecast behavior
 
 The notebook tests two crisis definitions: fixed historical windows and an ex-ante VIX>25 rule. These definitions are materially different.
 
@@ -206,7 +203,7 @@ The overlap table in the notebook explains why these conclusions diverge. Among 
 
 The practical implication is that strategy evaluation should not claim generic “crisis alpha” without specifying the regime definition. The SOP signal behaves differently depending on whether crisis means historical event windows or current high volatility.
 
-## 8. Portfolio results on the matched sample
+## 7. Portfolio results on the matched sample
 
 The matched strategy sample runs from **2010-02-28 to 2024-12-31** with **179 monthly observations**. Six strategies are compared: four SOP/VIX-SOP variants plus historical-mean Markowitz and buy-and-hold equity.
 
@@ -236,7 +233,7 @@ But the highest annual return belongs to historical mean + Markowitz (**17.87%**
 
 Buy-and-hold is a strong benchmark. It has lower annual return than the forecast-driven strategies, but also lower volatility, zero turnover, and the lowest max drawdown in the full matched sample. This is important because an implementable strategy needs to beat buy-and-hold after friction, not just before friction.
 
-### 8.1 Weight and implementation diagnostics
+### 7.1 Weight and implementation diagnostics
 
 | strategy                    |   avg weight |   median |   min |   max | months at 1.5 cap   | months at 0   |
 |:----------------------------|-------------:|---------:|------:|------:|:--------------------|:--------------|
@@ -251,7 +248,7 @@ The weight diagnostics show substantial use of the 1.5x cap. B is at the cap in 
 
 Turnover is another implementation issue. Vol-managed B has turnover of **0.178** per month and D has **0.215** per month, compared with **0.020** for A and **0.010** for historical mean Markowitz. Without transaction costs and financing costs, the vol-managed strategies may look cleaner than they would in production.
 
-### 8.2 Return correlations
+### 7.2 Return correlations
 
 | strategy   |     A |     B |     C |     D |    HM |   Buy-hold |
 |:-----------|------:|------:|------:|------:|------:|-----------:|
@@ -264,7 +261,7 @@ Turnover is another implementation issue. Vol-managed B has turnover of **0.178*
 
 All strategies are highly correlated because they are primarily equity-exposure strategies. The lowest correlations are between C and B/D, reflecting VIX-SOP’s different weight path. Still, even the lowest shown correlations are high. This argues against interpreting the strategies as independent return streams; they are different ways to time and lever the same equity beta.
 
-### 8.3 Statistical tests of strategy differences
+### 7.3 Statistical tests of strategy differences
 
 The notebook reports HAC/Newey-West-style tests of mean excess-return differences.
 
@@ -277,7 +274,7 @@ The notebook reports HAC/Newey-West-style tests of mean excess-return difference
 
 These tests do not support strong statistical claims. B and D have higher Sharpe ratios than A, but their mean excess-return differences versus A are negative in the test table and have very high p-values. A versus historical-mean Markowitz has p≈0.105, which is suggestive but still not conventionally significant. The correct reading is that the point estimates are economically interesting, but strategy superiority is not statistically settled.
 
-## 9. Crisis portfolio outcomes
+## 8. Crisis portfolio outcomes
 
 The crisis portfolio output contains 24 rows: six strategies across COVID, inflation shock, all fixed crisis months, and VIX>25 months. Annualized volatility, Sharpe, and CEQ are intentionally blank for windows with fewer than 12 observations.
 
@@ -323,7 +320,7 @@ The results are heterogeneous. Buy-and-hold loses the least in COVID, inflation 
 
 Vol-managed strategies reduce drawdowns in several stress windows, but they do not always improve cumulative returns. For example, during COVID, B and D have smaller max drawdowns than A/C, but worse cumulative returns. This is a classic cost of de-risking: volatility control can cushion losses but may also reduce rebound capture.
 
-## 10. Robustness checks
+## 9. Robustness checks
 
 The robustness table tests training-window length, lagged fundamentals, winsorized components, and lagged VIX.
 
@@ -351,7 +348,7 @@ The winsorized SOP variant has OOS R² of **0.685%**, better than the main basel
 
 The lagged-fundamentals variant remains positive at **0.506%**, which is encouraging for real-time implementability. The lagged-VIX variant remains positive at **0.517%**, but it is much weaker than contemporaneous VIX-enhanced SOP at **1.337%**. That gap is important: it raises a possible real-time timing concern, because contemporaneous VIX at month-end may be easier to justify than contemporaneous fundamentals, but the exact tradability depends on when signals are formed and when positions are implemented.
 
-## 11. Last-12 forecast inspection
+## 10. Last-12 forecast inspection
 
 The uploaded last-12 table covers forecast rows dated 2024-01-31 through 2024-12-31. The final row has no realized `ret_lead` because it would require the next target month beyond the panel.
 
@@ -381,35 +378,35 @@ Last five rows for inspection:
 
 The 2024 snapshot reinforces a broader point: short windows can tell a different story from full evaluation windows. A model can be best over 179 months and still not be best over the latest 11 realized months.
 
-## 12. Discussion: what the evidence supports
+## 11. Discussion: what the evidence supports
 
-### 12.1 The SOP decomposition is useful, but its edge is small
+### 11.1 The SOP decomposition is useful, but its edge is small
 
 The long-sample benchmark result supports SOP as a robust structured predictor. It beats the historical mean and ranks above common standalone predictors. But the magnitude is small. A **0.577%** OOS R² is valuable in equity-return forecasting, where even small improvements are hard to obtain, yet it does not by itself imply a large economic edge.
 
 The decomposition’s main advantage is that it imposes economic structure. Instead of asking a single predictor to forecast returns directly, SOP splits returns into dividend yield, earnings growth, and multiple growth. That likely reduces noise and helps explain why it beats individual predictors like `ep`, `dy`, `dfy`, and `tms`.
 
-### 12.2 VIX helps, but mostly as a squared-error improvement
+### 11.2 VIX helps, but mostly as a squared-error improvement
 
 VIX-enhanced SOP is the strongest modern-sample forecast. Its incremental R² versus baseline SOP is meaningful. But the MAE and DM-test evidence warns against overselling it. The model appears to reduce larger errors more than it reduces average absolute errors, and the formal pairwise loss-difference tests are not significant.
 
 That interpretation is economically plausible. VIX is most informative when volatility and discount-rate conditions are unusual. Those are exactly the periods where squared-error losses can be large. If VIX mainly improves forecasts in stress or rebound periods, then MSE can improve even when typical monthly MAE does not.
 
-### 12.3 Portfolio gains come from risk management and exposure, not pure alpha
+### 11.3 Portfolio gains come from risk management and exposure, not pure alpha
 
 The strategy results show that volatility-managed variants have the best Sharpe and CEQ. This is important, but it is not the same as proving forecast alpha. The strategies remain highly correlated with buy-and-hold and often sit at the leverage cap. Forecasts are being translated into dynamic beta and leverage decisions.
 
 The most practical interpretation is that SOP and VIX-SOP are **risk-budgeting signals**. They help decide when to scale exposure, but the strategies still depend heavily on equity risk premia and leverage. Any real deployment would need to model borrowing costs, margin requirements, ETF/futures implementation costs, and tax effects.
 
-### 12.4 Regime conclusions depend on labels
+### 11.4 Regime conclusions depend on labels
 
 Fixed crisis windows and VIX>25 months produce different forecast conclusions and different portfolio conclusions. This is not a bug; it is a substantive finding. Named crises include periods of both panic and recovery, while VIX>25 focuses on contemporaneous high-volatility states. Forecast and portfolio results should be reported separately for these regimes rather than merged into one generic crisis statement.
 
-### 12.5 Robustness is encouraging but not complete
+### 11.5 Robustness is encouraging but not complete
 
 The lagged-fundamentals and winsorized variants are useful because they address two common criticisms: data-release timing and outlier sensitivity. The fact that both remain positive strengthens the baseline SOP evidence. The lagged-VIX result is also positive, but much weaker than the contemporaneous VIX result, so VIX timing should receive more scrutiny.
 
-## 13. Limitations and threats to validity
+## 12. Limitations and threats to validity
 
 1. **Missing transaction costs and financing costs.** The strategy table is gross of costs. Because B and D have materially higher turnover and all Markowitz variants allow leverage, cost assumptions could change rankings.
 
@@ -425,7 +422,7 @@ The lagged-fundamentals and winsorized variants are useful because they address 
 
 7. **Potential model-selection risk.** Several variants are tested. The best-performing specification may partly reflect selection over choices such as training window, VIX timing, and winsorization.
 
-## 14. Recommended next research steps - Lucas: I don't think we should push much further than current results but here are some things that an AI recommended
+## 13. Recommended next research steps - Lucas: I don't think we should push much further than current results but here are some things that an AI recommended
 
 1. **Add transaction-cost and financing-cost layers.** Recompute portfolio results with plausible monthly turnover costs, leverage financing spreads, and margin constraints.
 
@@ -440,5 +437,3 @@ The lagged-fundamentals and winsorized variants are useful because they address 
 6. **Pre-register regime definitions.** Evaluate fixed crises, VIX>25, VIX quantiles, recessions, and drawdown regimes separately to avoid ambiguity.
 
 7. **Investigate winsorization further.** Since winsorized components improve long-sample SOP, test whether robust component estimation can be made part of the primary model rather than a robustness afterthought.
-
-The strongest next step is not another forecast tweak; it is an implementation-validity layer. The strategy needs transaction costs, leverage financing, and real-time data timing before the economic results can be treated as investable rather than promising in-sample research evidence.
