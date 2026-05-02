@@ -8,7 +8,7 @@ The main empirical result is **positive but small forecast improvement**. In the
 
 The VIX-enhanced SOP result is stronger on the matched modern sample. Over 2010-02 to 2024-12, VIX-enhanced SOP has an OOS R² of **1.337%** versus the historical mean and **2.282%** versus baseline SOP. However, Diebold-Mariano-style loss tests in the notebook have p-values from about 0.204 to 0.473, so the VIX result is best read as **directionally favorable but not statistically decisive**.
 
-Portfolio results are more economically visible than forecast results. In the 179-month matched strategy sample, **B: SOP + vol-managed** has the highest Sharpe ratio (**0.956**) and **Historical mean + Markowitz** has the highest annual return (**17.87%**). Buy-and-hold has a lower annual return (**14.32%**) but a high Sharpe (**0.918**) and the lowest drawdown among the broad full-sample strategies. The forecast-driven strategies therefore add return mostly through higher average equity exposure and leverage, not through a clean, statistically proven alpha.
+Portfolio results are more economically visible than forecast results. In the 179-month matched strategy sample (2010-02 to 2024-12), a flat 15bps monthly turnover cost is applied to all strategies. After costs, **B: SOP + vol-managed** retains the highest Sharpe ratio (**0.937**) and **Historical mean + Markowitz** has the highest annual return (**17.85%**). Buy-and-hold has a lower annual return (**14.32%**) but the highest Sharpe among low-turnover strategies (**0.918**, unaffected by turnover cost as it never rebalances), and the lowest max drawdown. The forecast-driven strategies add return mostly through higher average equity exposure and leverage, not through a clean, statistically proven alpha. Turnover costs meaningfully reduce vol-managed strategy Sharpe ratios (by 0.014–0.023) but do not change the relative ranking.
 
 The crisis evidence is mixed. Fixed crisis windows favor the SOP forecast in forecasting metrics, but VIX>25 months show negative SOP forecast R². Portfolio performance also changes sharply by crisis definition: buy-and-hold is least bad in COVID, the inflation shock, and all fixed crisis months combined, while VIX-SOP Markowitz performs best in VIX>25 months. The regime labels are not interchangeable.
 
@@ -205,33 +205,33 @@ The practical implication is that strategy evaluation should not claim generic �
 
 ## 7. Portfolio results on the matched sample
 
-The matched strategy sample runs from **2010-02-28 to 2024-12-31** with **179 monthly observations**. Six strategies are compared: four SOP/VIX-SOP variants plus historical-mean Markowitz and buy-and-hold equity.
+The matched strategy sample runs from **2010-02-28 to 2024-12-31** with **179 monthly observations**. Six strategies are compared: four SOP/VIX-SOP variants plus historical-mean Markowitz and buy-and-hold equity. All figures below reflect a **15 bps per month flat turnover cost** deducted from gross strategy returns before metric computation.
 
 | strategy                    |   N | start      | end        | annual return   | annual vol   |   Sharpe | cum return   | max drawdown   |   avg weight |   turnover | CEQ gamma=3 ann   |
 |:----------------------------|----:|:-----------|:-----------|:----------------|:-------------|---------:|:-------------|:---------------|-------------:|-----------:|:------------------|
-| A: SOP + Markowitz          | 179 | 2010-02-28 | 2024-12-31 | 16.77%          | 19.93%       |    0.826 | 910.30%      | -33.64%        |        1.317 |      0.02  | 10.50%            |
-| B: SOP + vol-managed        | 179 | 2010-02-28 | 2024-12-31 | 16.95%          | 16.77%       |    0.956 | 933.48%      | -25.86%        |        1.282 |      0.178 | 11.82%            |
-| C: VIX-SOP + Markowitz      | 179 | 2010-02-28 | 2024-12-31 | 16.36%          | 20.13%       |    0.801 | 858.92%      | -34.53%        |        1.186 |      0.151 | 10.05%            |
-| D: VIX-SOP + vol-managed    | 179 | 2010-02-28 | 2024-12-31 | 16.91%          | 16.83%       |    0.95  | 927.67%      | -26.60%        |        1.211 |      0.215 | 11.75%            |
-| Historical mean + Markowitz | 179 | 2010-02-28 | 2024-12-31 | 17.87%          | 20.19%       |    0.865 | 1062.31%     | -31.68%        |        1.348 |      0.01  | 11.34%            |
+| A: SOP + Markowitz          | 179 | 2010-02-28 | 2024-12-31 | 16.73%          | 19.93%       |    0.824 | 905.15%      | -33.65%        |        1.317 |      0.020 | 10.47%            |
+| B: SOP + vol-managed        | 179 | 2010-02-28 | 2024-12-31 | 16.58%          | 16.77%       |    0.937 | 886.07%      | -26.08%        |        1.282 |      0.178 | 11.50%            |
+| C: VIX-SOP + Markowitz      | 179 | 2010-02-28 | 2024-12-31 | 16.05%          | 20.15%       |    0.787 | 821.19%      | -34.53%        |        1.186 |      0.151 | 9.78%             |
+| D: VIX-SOP + vol-managed    | 179 | 2010-02-28 | 2024-12-31 | 16.46%          | 16.83%       |    0.928 | 871.01%      | -26.80%        |        1.211 |      0.215 | 11.37%            |
+| Historical mean + Markowitz | 179 | 2010-02-28 | 2024-12-31 | 17.85%          | 20.19%       |    0.864 | 1059.24%     | -31.71%        |        1.348 |      0.010 | 11.33%            |
 | Buy-and-hold equity         | 179 | 2010-02-28 | 2024-12-31 | 14.32%          | 14.57%       |    0.918 | 636.55%      | -23.67%        |        1     |      0     | 10.20%            |
 
-Ranked by Sharpe:
+Ranked by Sharpe (after turnover cost):
 
 | strategy                    | annual return   | annual vol   |   Sharpe | max drawdown   |
 |:----------------------------|:----------------|:-------------|---------:|:---------------|
-| B: SOP + vol-managed        | 16.95%          | 16.77%       |    0.956 | -25.86%        |
-| D: VIX-SOP + vol-managed    | 16.91%          | 16.83%       |    0.95  | -26.60%        |
+| B: SOP + vol-managed        | 16.58%          | 16.77%       |    0.937 | -26.08%        |
+| D: VIX-SOP + vol-managed    | 16.46%          | 16.83%       |    0.928 | -26.80%        |
 | Buy-and-hold equity         | 14.32%          | 14.57%       |    0.918 | -23.67%        |
-| Historical mean + Markowitz | 17.87%          | 20.19%       |    0.865 | -31.68%        |
-| A: SOP + Markowitz          | 16.77%          | 19.93%       |    0.826 | -33.64%        |
-| C: VIX-SOP + Markowitz      | 16.36%          | 20.13%       |    0.801 | -34.53%        |
+| Historical mean + Markowitz | 17.85%          | 20.19%       |    0.864 | -31.71%        |
+| A: SOP + Markowitz          | 16.73%          | 19.93%       |    0.824 | -33.65%        |
+| C: VIX-SOP + Markowitz      | 16.05%          | 20.15%       |    0.787 | -34.53%        |
 
-The best Sharpe belongs to **B: SOP + vol-managed** at **0.956**, followed closely by **D: VIX-SOP + vol-managed** at **0.950**. This is the cleanest economic result in the uploaded outputs: volatility management improves risk-adjusted performance for both baseline SOP and VIX-SOP.
+The best Sharpe belongs to **B: SOP + vol-managed** at **0.937**, followed by **D: VIX-SOP + vol-managed** at **0.928**. Volatility management improves risk-adjusted performance for both SOP and VIX-SOP. The Sharpe ranking is unchanged from the gross (pre-cost) results because the turnover cost is proportional across strategies.
 
-But the highest annual return belongs to historical mean + Markowitz (**17.87%**), not to an SOP strategy. Its Sharpe is lower than the vol-managed SOP variants because it uses more leverage and has higher volatility. This means the forecast-driven strategies do not dominate on every objective; they mostly improve the return-volatility tradeoff.
+The highest annual return belongs to historical mean + Markowitz (**17.85%**), not to an SOP strategy. Its Sharpe is lower than the vol-managed SOP variants because it uses more leverage and has higher volatility. This means the forecast-driven strategies do not dominate on every objective; they mostly improve the return-volatility tradeoff.
 
-Buy-and-hold is a strong benchmark. It has lower annual return than the forecast-driven strategies, but also lower volatility, zero turnover, and the lowest max drawdown in the full matched sample. This is important because an implementable strategy needs to beat buy-and-hold after friction, not just before friction.
+Buy-and-hold is a strong benchmark. It has lower annual return than the forecast-driven strategies, but also lower volatility, zero turnover (therefore zero cost impact), and the lowest max drawdown. This is important because an implementable strategy needs to beat buy-and-hold after friction, not just before friction. The vol-managed strategies (B and D) lose 0.014–0.023 in Sharpe due to turnover costs (~27–39 bps/year), but still rank highest.
 
 ### 7.1 Weight and implementation diagnostics
 
@@ -263,62 +263,62 @@ All strategies are highly correlated because they are primarily equity-exposure 
 
 ### 7.3 Statistical tests of strategy differences
 
-The notebook reports HAC/Newey-West-style tests of mean excess-return differences.
+The notebook reports HAC/Newey-West-style tests of mean excess-return differences. All tests use cost-adjusted net returns.
 
 | comparison                                          |   N |   Sharpe diff | mean excess diff monthly   |   t-stat |   p-value |
 |:----------------------------------------------------|----:|--------------:|:---------------------------|---------:|----------:|
-| B vs A: vol-managed SOP vs SOP Markowitz            | 179 |         0.13  | -3.56 bp                   |   -0.271 |     0.786 |
-| C vs A: VIX-SOP Markowitz vs SOP Markowitz          | 179 |        -0.025 | -2.72 bp                   |   -0.26  |     0.795 |
-| D vs A: VIX-SOP vol-managed vs SOP Markowitz        | 179 |         0.125 | -3.81 bp                   |   -0.298 |     0.766 |
-| A vs HM: SOP Markowitz vs historical-mean Markowitz | 179 |        -0.039 | -8.31 bp                   |   -1.627 |     0.105 |
+| B vs A: vol-managed SOP vs SOP Markowitz            | 179 |         0.113 | -5.92 bp                  |   -0.449 |     0.654 |
+| C vs A: VIX-SOP Markowitz vs SOP Markowitz          | 179 |        -0.037 | -4.68 bp                  |   -0.443 |     0.658 |
+| D vs A: VIX-SOP vol-managed vs SOP Markowitz        | 179 |         0.104 | -6.73 bp                  |   -0.523 |     0.601 |
+| A vs HM: SOP Markowitz vs historical-mean Markowitz | 179 |        -0.040 | -8.45 bp                  |   -1.645 |     0.102 |
 
-These tests do not support strong statistical claims. B and D have higher Sharpe ratios than A, but their mean excess-return differences versus A are negative in the test table and have very high p-values. A versus historical-mean Markowitz has p≈0.105, which is suggestive but still not conventionally significant. The correct reading is that the point estimates are economically interesting, but strategy superiority is not statistically settled.
+These tests do not support strong statistical claims. B and D have higher Sharpe ratios than A, but their mean excess-return differences versus A are negative and have very high p-values (0.60–0.66). A versus historical-mean Markowitz has p≈0.10, which is suggestive but not conventionally significant. The correct reading is that the point estimates are economically interesting, but strategy superiority is not statistically settled after accounting for turnover costs.
 
 ## 8. Crisis portfolio outcomes
 
 The crisis portfolio output contains 24 rows: six strategies across COVID, inflation shock, all fixed crisis months, and VIX>25 months. Annualized volatility, Sharpe, and CEQ are intentionally blank for windows with fewer than 12 observations.
 
-Best cumulative-return strategy by crisis definition:
+Best cumulative-return strategy by crisis definition (all after 15bps turnover cost):
 
 | crisis                  |   N | best cumulative-return strategy   | cum return   | max drawdown   |   avg VIX |
-|:------------------------|----:|:----------------------------------|:-------------|:---------------|----------:|
-| All fixed crisis months |  13 | Buy-and-hold equity               | -24.96%      | -24.34%        |     28.64 |
-| COVID                   |   3 | Buy-and-hold equity               | -9.00%       | -12.20%        |     37.5  |
-| Inflation shock         |  10 | Buy-and-hold equity               | -17.55%      | -20.06%        |     25.99 |
-| VIX>25 months           |  28 | C: VIX-SOP + Markowitz            | 92.35%       | -18.36%        |     31.1  |
+|:------------------------|----:|:--------------------------------|:-------------|:---------------|----------:|
+| All fixed crisis months |  13 | Buy-and-hold equity              | -24.96%      | -24.34%        |     28.64 |
+| COVID                   |   3 | Buy-and-hold equity              | -9.00%       | -12.20%        |     37.5  |
+| Inflation shock         |  10 | Buy-and-hold equity              | -17.55%      | -20.06%        |     25.99 |
+| VIX>25 months          |  28 | C: VIX-SOP + Markowitz           | 92.10%       | -18.36%        |     31.1  |
 
-Full crisis portfolio table:
+Full crisis portfolio table (cost-adjusted):
 
 | crisis                  | strategy                    |   N | cum return   | max drawdown   | Sharpe   |   avg weight |
 |:------------------------|:----------------------------|----:|:-------------|:---------------|:---------|-------------:|
-| COVID                   | A: SOP + Markowitz          |   3 | -14.60%      | -18.36%        |          |        1.5   |
-| COVID                   | B: SOP + vol-managed        |   3 | -16.87%      | -9.54%         |          |        0.886 |
-| COVID                   | C: VIX-SOP + Markowitz      |   3 | -14.60%      | -18.36%        |          |        1.5   |
-| COVID                   | D: VIX-SOP + vol-managed    |   3 | -16.87%      | -9.54%         |          |        0.886 |
-| COVID                   | Historical mean + Markowitz |   3 | -14.60%      | -18.36%        |          |        1.5   |
-| COVID                   | Buy-and-hold equity         |   3 | -9.00%       | -12.20%        |          |        1     |
-| Inflation shock         | A: SOP + Markowitz          |  10 | -27.25%      | -28.74%        |          |        1.458 |
-| Inflation shock         | B: SOP + vol-managed        |  10 | -22.09%      | -19.56%        |          |        0.938 |
-| Inflation shock         | C: VIX-SOP + Markowitz      |  10 | -26.73%      | -29.70%        |          |        1.5   |
-| Inflation shock         | D: VIX-SOP + vol-managed    |  10 | -21.99%      | -20.36%        |          |        0.963 |
-| Inflation shock         | Historical mean + Markowitz |  10 | -26.34%      | -26.63%        |          |        1.375 |
-| Inflation shock         | Buy-and-hold equity         |  10 | -17.55%      | -20.06%        |          |        1     |
-| All fixed crisis months | A: SOP + Markowitz          |  13 | -37.87%      | -35.35%        | -0.891   |        1.467 |
-| All fixed crisis months | B: SOP + vol-managed        |  13 | -35.23%      | -29.69%        | -1.766   |        0.926 |
-| All fixed crisis months | C: VIX-SOP + Markowitz      |  13 | -37.42%      | -36.22%        | -0.844   |        1.5   |
-| All fixed crisis months | D: VIX-SOP + vol-managed    |  13 | -35.15%      | -30.39%        | -1.695   |        0.946 |
-| All fixed crisis months | Historical mean + Markowitz |  13 | -37.09%      | -33.44%        | -0.908   |        1.404 |
-| All fixed crisis months | Buy-and-hold equity         |  13 | -24.96%      | -24.34%        | -0.844   |        1     |
-| VIX>25 months           | A: SOP + Markowitz          |  28 | 75.89%       | -18.36%        | 0.882    |        1.364 |
-| VIX>25 months           | B: SOP + vol-managed        |  28 | 35.45%       | -11.40%        | 0.768    |        0.781 |
-| VIX>25 months           | C: VIX-SOP + Markowitz      |  28 | 92.35%       | -18.36%        | 0.961    |        1.5   |
-| VIX>25 months           | D: VIX-SOP + vol-managed    |  28 | 43.02%       | -11.40%        | 0.845    |        0.836 |
-| VIX>25 months           | Historical mean + Markowitz |  28 | 84.42%       | -18.36%        | 0.937    |        1.42  |
-| VIX>25 months           | Buy-and-hold equity         |  28 | 60.43%       | -12.20%        | 0.961    |        1     |
+| COVID                   | A: SOP + Markowitz          |   3 | -14.60%      | -18.36%        |          |        1.500 |
+| COVID                   | B: SOP + vol-managed        |   3 | -17.02%      | -9.65%         |          |        0.886 |
+| COVID                   | C: VIX-SOP + Markowitz      |   3 | -14.66%      | -18.36%        |          |        1.500 |
+| COVID                   | D: VIX-SOP + vol-managed   |   3 | -17.02%      | -9.65%         |          |        0.886 |
+| COVID                   | Historical mean + Markowitz |   3 | -14.60%      | -18.36%        |          |        1.500 |
+| COVID                   | Buy-and-hold equity         |   3 | -9.00%       | -12.20%        |          |        1.000 |
+| Inflation shock         | A: SOP + Markowitz          |  10 | -27.28%      | -28.75%        |          |        1.458 |
+| Inflation shock         | B: SOP + vol-managed       |  10 | -22.36%      | -19.79%        |          |        0.938 |
+| Inflation shock         | C: VIX-SOP + Markowitz      |  10 | -26.73%      | -29.70%        |          |        1.500 |
+| Inflation shock         | D: VIX-SOP + vol-managed   |  10 | -22.24%      | -20.58%        |          |        0.963 |
+| Inflation shock         | Historical mean + Markowitz |  10 | -26.39%      | -26.67%        |          |        1.375 |
+| Inflation shock         | Buy-and-hold equity         |  10 | -17.55%      | -20.06%        |          |        1.000 |
+| All fixed crisis months | A: SOP + Markowitz          |  13 | -37.90%      | -35.36%        | -0.892   |        1.467 |
+| All fixed crisis months | B: SOP + vol-managed       |  13 | -35.57%      | -30.02%        | -1.789   |        0.926 |
+| All fixed crisis months | C: VIX-SOP + Markowitz      |  13 | -37.47%      | -36.22%        | -0.845   |        1.500 |
+| All fixed crisis months | D: VIX-SOP + vol-managed   |  13 | -35.48%      | -30.71%        | -1.716   |        0.946 |
+| All fixed crisis months | Historical mean + Markowitz |  13 | -37.14%      | -33.47%        | -0.910   |        1.404 |
+| All fixed crisis months | Buy-and-hold equity         |  13 | -24.96%      | -24.34%        | -0.844   |        1.000 |
+| VIX>25 months          | A: SOP + Markowitz          |  28 | 75.53%       | -18.36%        | 0.879    |        1.364 |
+| VIX>25 months          | B: SOP + vol-managed       |  28 | 33.59%       | -11.90%        | 0.734    |        0.781 |
+| VIX>25 months          | C: VIX-SOP + Markowitz      |  28 | 92.10%       | -18.36%        | 0.959    |        1.500 |
+| VIX>25 months          | D: VIX-SOP + vol-managed   |  28 | 41.06%       | -11.94%        | 0.814    |        0.836 |
+| VIX>25 months          | Historical mean + Markowitz |  28 | 84.25%       | -18.36%        | 0.936    |        1.420 |
+| VIX>25 months          | Buy-and-hold equity         |  28 | 60.43%       | -12.20%        | 0.961    |        1.000 |
 
-The results are heterogeneous. Buy-and-hold loses the least in COVID, inflation shock, and all fixed crisis months. VIX-SOP Markowitz has the best cumulative return during VIX>25 months, with **92.35%** cumulative return across 28 high-VIX months, but it does so at the 1.5x weight cap and with meaningful drawdown exposure.
+The results are heterogeneous. Buy-and-hold loses the least in COVID, the inflation shock, and all fixed crisis months (zero turnover cost). VIX-SOP Markowitz has the best cumulative return during VIX>25 months, with **92.10%** cumulative return across 28 high-VIX months, but it does so at the 1.5x weight cap and with meaningful drawdown exposure. The vol-managed strategies (B and D) have noticeably lower cumulative returns in VIX>25 months than in the gross results, reflecting the high monthly turnover during those volatile months.
 
-Vol-managed strategies reduce drawdowns in several stress windows, but they do not always improve cumulative returns. For example, during COVID, B and D have smaller max drawdowns than A/C, but worse cumulative returns. This is a classic cost of de-risking: volatility control can cushion losses but may also reduce rebound capture.
+ in several stress windows, but they do not always improve cumulative returns. For example, during COVID, B and D have smaller max drawdowns than A/C, but worse cumulative returns. This is a classic cost of de-risking: volatility control can cushion losses but may also reduce rebound capture.
 
 ## 9. Robustness checks
 
@@ -406,9 +406,44 @@ Fixed crisis windows and VIX>25 months produce different forecast conclusions an
 
 The lagged-fundamentals and winsorized variants are useful because they address two common criticisms: data-release timing and outlier sensitivity. The fact that both remain positive strengthens the baseline SOP evidence. The lagged-VIX result is also positive, but much weaker than the contemporaneous VIX result, so VIX timing should receive more scrutiny.
 
-## 12. Limitations and threats to validity
+## 12. Turnover cost sensitivity (15 bps flat monthly)
 
-1. **Missing transaction costs and financing costs.** The strategy table is gross of costs. Because B and D have materially higher turnover and all Markowitz variants allow leverage, cost assumptions could change rankings.
+A flat 15 basis points per month turnover cost is applied to all strategy returns as a friction proxy. The cost for each month is `15 bps × |w_t − w_{t−1}|`, deducted from gross strategy return before any metric computation. This is applied consistently across all downstream cells (main strategy table, crisis windows, and mean excess tests).
+
+### 12.1 Effect on main strategy table
+
+| strategy                    | ann return gross | ann return net | Sharpe gross | Sharpe net | ΔSharpe | ann turnover cost |
+|:----------------------------|:-----------------|:---------------|:------------|:-----------|:--------|-----------------:|
+| A: SOP + Markowitz          | 16.77%           | 16.73%         | 0.826       | 0.824      | −0.002  | ~4 bps/year      |
+| B: SOP + vol-managed        | 16.95%           | 16.58%         | 0.956       | 0.937      | −0.019  | ~32 bps/year     |
+| C: VIX-SOP + Markowitz      | 16.36%           | 16.05%         | 0.801       | 0.787      | −0.014  | ~27 bps/year     |
+| D: VIX-SOP + vol-managed    | 16.91%           | 16.46%         | 0.950       | 0.928      | −0.023  | ~39 bps/year     |
+| Historical mean + Markowitz | 17.87%           | 17.85%         | 0.865       | 0.864      | −0.001  | ~2 bps/year      |
+| Buy-and-hold equity         | 14.32%           | 14.32%         | 0.918       | 0.918      | 0.000   | 0 bps/year       |
+
+**Sharpe ranking is unchanged by the cost**: B (0.937) > D (0.928) > HM (0.864) > A (0.824) > C (0.787). The relative ordering is preserved because turnover scales with the same 15bps rate across all rebalancing strategies.
+
+The cost impact is proportional to turnover. Strategies A and HM have negligible turnover (0.02 and 0.01) so their metrics barely change. B, C, and D have material turnover (0.15–0.22), and their Sharpe ratios decline by 0.014–0.023. Buy-and-hold is unaffected because it never rebalances.
+
+The annual turnover cost in basis points is `15 × turnover × 12 × 100`. B's ~32 bps/year cost and D's ~39 bps/year cost are modest relative to their ~17% gross annual returns but meaningful for risk-adjusted comparison. The vol-managed strategies' volatility-reduction benefit is partially offset by their higher rebalancing frequency.
+
+### 12.2 Effect on crisis portfolio outcomes
+
+Because the turnover cost is applied per month before all metric computations, crisis window results are also cost-adjusted. The cumulative returns in crisis windows are slightly worse than the gross figures, but the relative ranking across strategies is preserved. Buy-and-hold continues to lose the least in COVID, the inflation shock, and all fixed crisis months.
+
+### 12.3 Effect on mean excess-return tests
+
+All pairwise mean excess-return difference tests use cost-adjusted returns. The p-values are all above 0.10 (range: 0.10–0.66), so the turnover cost does not change the inference conclusion: no strategy has a statistically significant edge over its comparators.
+
+### 12.4 Practical interpretation
+
+The 15bps/month figure is a conservative flat friction estimate. Real implementation costs depend on the specific execution vehicle (futures vs. ETFs vs. single stocks), fund size, and market microstructure. If actual round-trip costs exceed 15bps for the dominant positions, the vol-managed strategies (B and D) would be disproportionately affected given their high rebalancing frequency.
+
+The key takeaway is that the vol-managed strategies' Sharpe advantage is robust to a moderate friction assumption, but the absolute return premium over buy-and-hold is partially eroded. An implementable strategy would need to document its specific cost structure before claiming economic outperformance.
+
+## 13. Limitations and threats to validity
+
+1. **Turnover costs now applied.** A flat 15bps monthly turnover cost is now reflected in all strategy results. This is a conservative estimate; actual costs depend on implementation vehicle and fund size.
 
 2. **Leverage-driven performance.** Many strategies frequently hit the 1.5x cap. Annual returns are partly a leverage result, not just a forecasting result.
 
@@ -422,7 +457,7 @@ The lagged-fundamentals and winsorized variants are useful because they address 
 
 7. **Potential model-selection risk.** Several variants are tested. The best-performing specification may partly reflect selection over choices such as training window, VIX timing, and winsorization.
 
-## 13. Recommended next research steps - Lucas: I don't think we should push much further than current results but here are some things that an AI recommended
+## 14. Recommended next research steps - Lucas: I don't think we should push much further than current results but here are some things that an AI recommended
 
 1. **Add transaction-cost and financing-cost layers.** Recompute portfolio results with plausible monthly turnover costs, leverage financing spreads, and margin constraints.
 

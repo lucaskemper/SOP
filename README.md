@@ -178,11 +178,11 @@ Source: [sop_strategy_matched_results.csv](sop_strategy_matched_results.csv), [s
 
 Matched sample: N=179 (2010-02 to 2024-12).
 
-Headline comparisons:
-- Best Sharpe among SOP variants is B: SOP plus vol-managed at 0.956178.
-- D: VIX-SOP plus vol-managed is close at 0.950481.
-- Buy-and-hold Sharpe is 0.918445 with lower turnover and no leverage.
-- Historical mean plus Markowitz has highest annual return (0.178740) but lower Sharpe than B.
+Headline comparisons (all after 15bps/month flat turnover cost):
+- Best Sharpe among SOP variants is B: SOP plus vol-managed at 0.937.
+- D: VIX-SOP plus vol-managed is close at 0.928.
+- Buy-and-hold Sharpe is 0.918 with zero turnover (cost-immune).
+- Historical mean plus Markowitz has highest annual return (17.85%) but lower Sharpe than B.
 
 Risk and implementation texture:
 - Vol-managed variants reduce volatility and drawdown vs pure Markowitz SOP variants.
@@ -193,7 +193,7 @@ Risk and implementation texture:
 Source: [sop_mean_excess_tests_matched.csv](sop_mean_excess_tests_matched.csv)
 
 Across reported pairwise comparisons:
-- Mean excess-return difference p-values are weak (for example 0.786, 0.795, 0.766; best case around 0.105).
+- Mean excess-return difference p-values are weak (range 0.10 to 0.66 after turnover cost; example 0.654, 0.658, 0.601; best case around 0.10).
 
 Interpretation:
 - Performance ranking in point estimates should not be overinterpreted as statistically settled.
@@ -250,7 +250,7 @@ If your objective is reliability and reproducibility:
 
 - Forecast R2 gains are small in absolute magnitude, even when positive.
 - Several inference p-values are weak, limiting strong claims about strategy superiority.
-- No transaction costs, taxes, slippage, or market impact are applied.
+- A flat 15bps per month turnover cost is applied to all strategy returns (deducted as 15bps times absolute weight change each month); no financing costs, taxes, slippage, or market impact beyond this friction proxy.
 - Leverage is allowed by construction, which can inflate both upside and downside outcomes depending on regime.
 - Regime-definition choice materially changes crisis conclusions.
 
