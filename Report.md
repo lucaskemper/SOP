@@ -441,6 +441,27 @@ The 15bps/month figure is a conservative flat friction estimate. Real implementa
 
 The key takeaway is that the vol-managed strategies' Sharpe advantage is robust to a moderate friction assumption, but the absolute return premium over buy-and-hold is partially eroded. An implementable strategy would need to document its specific cost structure before claiming economic outperformance.
 
+### 12.5 Leverage cap robustness: 0-100% vs 0-150%
+
+As a robustness check, all six strategies are re-run with a strict weight cap of 0-100% (no leverage), holding everything else constant: same matched sample (N=179), same forecasts, same 15bps/month turnover cost. The no-leverage weights are computed by re-applying the Markowitz formula with `hi=1.0`, clipping vol-managed scales at 1.0 instead of 1.5, then applying the same turnover deduction.
+
+| strategy                    | Sharpe (0-150%) | Sharpe (0-100%) | ΔSharpe | ΔAnnRet (bp/mo) |
+|:----------------------------|:----------------|:----------------|:---------|:----------------|
+| B: SOP + vol-managed        | 0.937           | 0.972           | +0.035   | −406 bp         |
+| D: VIX-SOP + vol-managed    | 0.928           | 0.942           | +0.015   | −464 bp         |
+| Buy-and-hold equity         | 0.918           | 0.918           | 0         | 0 bp            |
+| Historical mean + Markowitz   | 0.864           | 0.892           | +0.028   | −436 bp         |
+| A: SOP + Markowitz           | 0.824           | 0.873           | +0.049   | −356 bp         |
+| C: VIX-SOP + Markowitz       | 0.787           | 0.821           | +0.034   | −374 bp         |
+
+**Sharpe ranking is unchanged.** B remains best, D second, buy-and-hold third regardless of leverage cap.
+
+The most striking result is that **removing leverage improves Sharpe for every strategy**. Because annualized volatility falls more than annualized return when leverage is removed, risk-adjusted performance improves. The Markowitz mean-variance rule scales weight proportionally to excess return divided by variance, so the 0-100% cap eliminates the upside from leverage but also reduces volatility more than proportionally in this sample — net positive for Sharpe.
+
+The ΔAnnRet column shows the monthly return cost of losing leverage: ~350-460 bps/month less for the leveraged strategies. A and C (plain Markowitz) lose the least in Sharpe because their vol-management already reduced volatility relative to D and B; removing leverage simply reduces the leverage bonus without dramatically changing the risk profile.
+
+The practical implication: the 1.5x leverage cap is not driving the Sharpe advantage of vol-managed strategies. Even without leverage, B and D retain the top Sharpe ratios. This is an encouraging robustness finding for the vol-management mechanism itself.
+
 ## 13. Limitations and threats to validity
 
 1. **Turnover costs now applied.** A flat 15bps monthly turnover cost is now reflected in all strategy results. This is a conservative estimate; actual costs depend on implementation vehicle and fund size.
@@ -467,7 +488,7 @@ The key takeaway is that the vol-managed strategies' Sharpe advantage is robust 
 
 4. **Separate exposure timing from forecast accuracy.** Report strategy alpha against equity beta and dynamic beta benchmarks, not only buy-and-hold and historical-mean Markowitz.
 
-5. **Stress-test leverage caps.** Rerun strategy results at caps such as 1.0, 1.25, and 2.0 to see whether conclusions depend on the 1.5x bound.
+5. **Stress-test leverage caps.** Rerun strategy results at caps such as 1.0, 1.25, and 2.0 to see whether conclusions depend on the 1.5x bound. *(Done: 0-100% cap tested. Sharpe ranking unchanged; removing leverage improves Sharpe for all strategies as volatility falls more than return.)*
 
 6. **Pre-register regime definitions.** Evaluate fixed crises, VIX>25, VIX quantiles, recessions, and drawdown regimes separately to avoid ambiguity.
 

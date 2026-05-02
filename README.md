@@ -227,6 +227,11 @@ Interpretation:
 - Results are somewhat parameter-sensitive but directionally coherent with the main narrative.
 - The robustness table is essential for understanding where improvements are stable vs fragile.
 
+### 6.8 Leverage cap robustness
+Source: [sop_portfolio_robustness_leverage.csv](sop_portfolio_robustness_leverage.csv)
+
+All six strategies are re-run with a strict 0-100% weight cap (no leverage), holding everything else constant: same 15bps/month turnover cost, same matched sample. **Sharpe ranking is unchanged**: B (0.972) > D (0.942) > Buy-and-hold (0.918) > HM (0.892) > A (0.873) > C (0.821). Removing leverage improves Sharpe for every strategy because volatility falls more than return. The vol-managed strategies' Sharpe advantage is robust to the leverage assumption.
+
 ## 7. Practical Reading Guide By Objective
 
 If your objective is forecast comparison:
